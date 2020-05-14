@@ -2389,7 +2389,8 @@ public class Wallet {
     return rewardMap;
   }
 
-  public HashMap<String, Long> queryPayByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
+  public HashMap<String, Long> queryPayByTimeStamp(byte[] address,
+      long startTimeStamp, long endTimeStamp) {
     HashMap<String, Long> rewardMap = new HashMap<>();
     if (!dbManager.getDynamicPropertiesStore().allowChangeDelegation()) {
       return rewardMap;
@@ -2421,7 +2422,7 @@ public class Wallet {
     return rewardMap;
   }
 
-  public double percentageOfBlockReward(long beginCycle, long endCycle, byte[]address) {
+  public double percentageOfBlockReward(long beginCycle, long endCycle, byte[] address) {
     long reward = 0, blockPayReward = 0;
     if (beginCycle < endCycle) {
       for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
@@ -2431,11 +2432,15 @@ public class Wallet {
         blockPayReward += dbManager.getDelegationStore().getBlockReward(cycle, address);
       }
     }
-    if (reward == 0 || blockPayReward == 0) return 0;
+
+    if (reward == 0 || blockPayReward == 0) {
+      return 0;
+    }
     return blockPayReward / reward;
   }
 
-  public HashMap<String, Long> queryRewardByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
+  public HashMap<String, Long> queryRewardByTimeStamp(byte[] address,
+      long startTimeStamp, long endTimeStamp) {
     HashMap<String, Long> rewardMap = new HashMap<>();
     if (!dbManager.getDynamicPropertiesStore().allowChangeDelegation()) {
       return rewardMap;
@@ -2456,9 +2461,10 @@ public class Wallet {
       }
     }
     double percentage = percentageOfBlockReward(beginCycle, endCycle, address);
-    long blockBonus = new Double (bonus * percentage).longValue();
+    long blockBonus = new Double(bonus * percentage).longValue();
+
     rewardMap.put("totalIncome", bonus);
-    rewardMap.put("produceBlockIncome", blockBonus );
+    rewardMap.put("produceBlockIncome", blockBonus);
     rewardMap.put("voteIncome", bonus - blockBonus);
     return rewardMap;
   }
