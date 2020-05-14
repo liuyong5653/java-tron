@@ -75,6 +75,8 @@ public class DelegationService {
 
   public void payBlockReward(byte[] witnessAddress, long value) {
     logger.debug("pay {} block reward {}", Hex.toHexString(witnessAddress), value);
+    long cycle = dynamicPropertiesStore.getCurrentCycleNumber();
+    delegationStore.addBlockReward(cycle, witnessAddress, value);
     payReward(witnessAddress, value);
   }
 

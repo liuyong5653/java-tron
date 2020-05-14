@@ -2389,9 +2389,10 @@ public class Wallet {
     return rewardMap;
   }
 
-  public long queryPayByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
+  public HashMap<String, Long> queryPayByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
+    HashMap<String, Long> rewardMap = new HashMap<>();
     if (!dbManager.getDynamicPropertiesStore().allowChangeDelegation()) {
-      return 0;
+      return rewardMap;
     }
 
     AccountCapsule accountCapsule = dbManager.getAccountStore().get(address);
@@ -2401,16 +2402,23 @@ public class Wallet {
         .getCycleFromTimeStamp(endTimeStamp);
     long reward = 0;
     if (accountCapsule == null) {
-      return 0;
+      return rewardMap;
     }
+
+    long blockPayReward = 0;
     if (beginCycle < endCycle) {
       for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
         int brokerage = dbManager.getDelegationStore().getBrokerage(cycle, address);
         double brokerageRate = (double) brokerage / 100;
         reward += dbManager.getDelegationStore().getReward(cycle, address) / (1 - brokerageRate);
+        blockPayReward += dbManager.getDelegationStore().getBlockReward(cycle, address);
       }
     }
-    return reward;
+    rewardMap.put("totalIncome", reward);
+    rewardMap.put("produceBlockIncome", blockPayReward);
+    rewardMap.put("voteIncome", reward - blockPayReward);
+
+    return rewardMap;
   }
 
   public long queryRewardByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
