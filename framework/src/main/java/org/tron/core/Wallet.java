@@ -2437,7 +2437,7 @@ public class Wallet {
     if (reward == 0 || blockPayReward == 0) {
       return 0;
     }
-    return blockPayReward / reward;
+    return (double) blockPayReward / (double)reward;
   }
 
   public HashMap<String, Long> queryRewardByTimeStamp(byte[] address,
