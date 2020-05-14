@@ -2423,7 +2423,8 @@ public class Wallet {
   }
 
   public double percentageOfBlockReward(long beginCycle, long endCycle, byte[] address) {
-    long reward = 0, blockPayReward = 0;
+    long reward = 0;
+    long blockPayReward = 0;
     if (beginCycle < endCycle) {
       for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
         int brokerage = dbManager.getDelegationStore().getBrokerage(cycle, address);

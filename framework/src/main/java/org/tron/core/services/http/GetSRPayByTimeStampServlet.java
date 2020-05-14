@@ -31,7 +31,7 @@ public class GetSRPayByTimeStampServlet extends RateLimiterServlet {
       if (startTimeStamp < endTimeStamp && address != null) {
         HashMap<String, Long> value = wallet
             .queryPayByTimeStamp(address, startTimeStamp, endTimeStamp);
-        response.getWriter().println(Util.printRewardMapToJSON(value));
+        response.getWriter().println(Util.printMapToJSON(value));
       } else {
         response.getWriter().println("{}");
       }
@@ -57,7 +57,7 @@ public class GetSRPayByTimeStampServlet extends RateLimiterServlet {
       if (startTimeStamp < endTimeStamp && address != null) {
         HashMap<String, Long> value = wallet
             .queryPayByTimeStamp(address, startTimeStamp, endTimeStamp);
-        response.getWriter().println(Util.printRewardMapToJSON(value));
+        response.getWriter().println(Util.printMapToJSON(value));
       } else {
         response.getWriter().println("{}");
       }
