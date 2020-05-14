@@ -58,7 +58,6 @@ public class GetSRPayByTimeStampServlet extends RateLimiterServlet {
         HashMap<String, Long> value = wallet
             .queryPayByTimeStamp(address, startTimeStamp, endTimeStamp);
         response.getWriter().println(Util.printRewardMapToJSON(value));
-
       } else {
         response.getWriter().println("{}");
       }
