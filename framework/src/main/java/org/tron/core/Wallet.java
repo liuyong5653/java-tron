@@ -2462,11 +2462,11 @@ public class Wallet {
       }
     }
     double percentage = percentageOfBlockReward(beginCycle, endCycle, address);
-    long blockBonus = new Double(bonus * percentage).longValue();
+    Double blockBonus = new Double(bonus * percentage);
 
     rewardMap.put("totalIncome", bonus);
-    rewardMap.put("produceBlockIncome", blockBonus);
-    rewardMap.put("voteIncome", bonus - blockBonus);
+    rewardMap.put("produceBlockIncome", blockBonus.longValue());
+    rewardMap.put("voteIncome", bonus - blockBonus.longValue());
     return rewardMap;
   }
 
