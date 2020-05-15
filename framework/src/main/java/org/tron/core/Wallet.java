@@ -2349,14 +2349,14 @@ public class Wallet {
       long startTimeStamp, long endTimeStamp) {
     HashMap<String, Long> rewardMap = new HashMap<>();
     long beginCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(startTimeStamp);
+        .getBeginCycleFromTimeStamp(startTimeStamp);
     long endCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(endTimeStamp);
+        .getEndCycleFromTimeStamp(endTimeStamp);
     if (address.length == 0) {
       return rewardMap;
     }
 
-    for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
+    for (long cycle = beginCycle; cycle <= endCycle; cycle++) {
       List<Vote> voteList = getVoteList(address, cycle);
       if (voteList != null) {
         for (Vote vote : voteList) {
@@ -2389,7 +2389,8 @@ public class Wallet {
     return rewardMap;
   }
 
-  public HashMap<String, Long> queryPayByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
+  public HashMap<String, Long> queryPayByTimeStamp(byte[] address,
+      long startTimeStamp, long endTimeStamp) {
     HashMap<String, Long> rewardMap = new HashMap<>();
     if (!dbManager.getDynamicPropertiesStore().allowChangeDelegation()) {
       return rewardMap;
@@ -2397,17 +2398,17 @@ public class Wallet {
 
     AccountCapsule accountCapsule = dbManager.getAccountStore().get(address);
     long beginCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(startTimeStamp);
+        .getBeginCycleFromTimeStamp(startTimeStamp);
     long endCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(endTimeStamp);
+        .getEndCycleFromTimeStamp(endTimeStamp);
     long reward = 0;
     if (accountCapsule == null) {
       return rewardMap;
     }
 
     long blockPayReward = 0;
-    if (beginCycle < endCycle) {
-      for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
+    if (beginCycle <= endCycle) {
+      for (long cycle = beginCycle; cycle <= endCycle; cycle++) {
         int brokerage = dbManager.getDelegationStore().getBrokerage(cycle, address);
         double brokerageRate = (double) brokerage / 100;
         reward += dbManager.getDelegationStore().getReward(cycle, address) / (1 - brokerageRate);
@@ -2421,26 +2422,52 @@ public class Wallet {
     return rewardMap;
   }
 
-  public long queryRewardByTimeStamp(byte[] address, long startTimeStamp, long endTimeStamp) {
-    if (!dbManager.getDynamicPropertiesStore().allowChangeDelegation()) {
+  public double percentageOfBlockReward(long beginCycle, long endCycle, byte[] address) {
+    long reward = 0;
+    long blockPayReward = 0;
+    if (beginCycle < endCycle) {
+      for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
+        int brokerage = dbManager.getDelegationStore().getBrokerage(cycle, address);
+        double brokerageRate = (double) brokerage / 100;
+        reward += dbManager.getDelegationStore().getReward(cycle, address) / (1 - brokerageRate);
+        blockPayReward += dbManager.getDelegationStore().getBlockReward(cycle, address);
+      }
+    }
+
+    if (reward == 0 || blockPayReward == 0) {
       return 0;
+    }
+    return (double) blockPayReward / (double)reward;
+  }
+
+  public HashMap<String, Long> queryRewardByTimeStamp(byte[] address,
+      long startTimeStamp, long endTimeStamp) {
+    HashMap<String, Long> rewardMap = new HashMap<>();
+    if (!dbManager.getDynamicPropertiesStore().allowChangeDelegation()) {
+      return rewardMap;
     }
 
     AccountCapsule accountCapsule = dbManager.getAccountStore().get(address);
     long beginCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(startTimeStamp);
+        .getBeginCycleFromTimeStamp(startTimeStamp);
     long endCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(endTimeStamp);
-    long reward = 0;
+        .getEndCycleFromTimeStamp(endTimeStamp);
+    long bonus = 0;
     if (accountCapsule == null) {
-      return 0;
+      return rewardMap;
     }
-    if (beginCycle < endCycle) {
-      for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
-        reward += dbManager.getDelegationStore().getReward(cycle, address);
+    if (beginCycle <= endCycle) {
+      for (long cycle = beginCycle; cycle <= endCycle; cycle++) {
+        bonus += dbManager.getDelegationStore().getReward(cycle, address);
       }
     }
-    return reward;
+    double percentage = percentageOfBlockReward(beginCycle, endCycle, address);
+    Double blockBonus = new Double(bonus * percentage);
+
+    rewardMap.put("totalIncome", bonus);
+    rewardMap.put("produceBlockIncome", blockBonus.longValue());
+    rewardMap.put("voteIncome", bonus - blockBonus.longValue());
+    return rewardMap;
   }
 
   public ExchangeList getPaginatedExchangeList(long offset, long limit) {
@@ -2481,15 +2508,15 @@ public class Wallet {
 
     AccountCapsule accountCapsule = dbManager.getAccountStore().get(address);
     long beginCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(startTimeStamp);
+        .getBeginCycleFromTimeStamp(startTimeStamp);
     long endCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(endTimeStamp);
+        .getEndCycleFromTimeStamp(endTimeStamp);
     long voteNumber = 0;
     if (accountCapsule == null) {
       return 0;
     }
-    if (beginCycle < endCycle) {
-      for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
+    if (beginCycle <= endCycle) {
+      for (long cycle = beginCycle; cycle <= endCycle; cycle++) {
         voteNumber += dbManager.getDelegationStore().getWitnessVote(cycle,address);
       }
       voteNumber = voteNumber / (endCycle - beginCycle);
@@ -2500,14 +2527,14 @@ public class Wallet {
   public double queryTotalVoteNumber(long startTimeStamp, long endTimeStamp) {
 
     long beginCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(startTimeStamp);
+        .getBeginCycleFromTimeStamp(startTimeStamp);
     long endCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(endTimeStamp);
+        .getEndCycleFromTimeStamp(endTimeStamp);
     AtomicLong voteNumber = new AtomicLong();
     double voteNumberTotal = 0;
 
-    if (beginCycle < endCycle) {
-      for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
+    if (beginCycle <= endCycle) {
+      for (long cycle = beginCycle; cycle <= endCycle; cycle++) {
         List<WitnessCapsule> allWitnesses = dbManager.getWitnessStore().getAllWitnesses();
         long finalCycle = cycle;
         allWitnesses.forEach(witness -> {
@@ -2523,15 +2550,15 @@ public class Wallet {
   public double querySrRatio(byte[] address, long startTimeStamp, long endTimeStamp) {
     AccountCapsule accountCapsule = dbManager.getAccountStore().get(address);
     long beginCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(startTimeStamp);
+        .getBeginCycleFromTimeStamp(startTimeStamp);
     long endCycle = dbManager.getDelegationService()
-        .getCycleFromTimeStamp(endTimeStamp);
+        .getEndCycleFromTimeStamp(endTimeStamp);
     double srRatio = 0;
     if (accountCapsule == null) {
       return 0;
     }
-    if (beginCycle < endCycle) {
-      for (long cycle = beginCycle + 1; cycle <= endCycle; cycle++) {
+    if (beginCycle <= endCycle) {
+      for (long cycle = beginCycle; cycle <= endCycle; cycle++) {
         srRatio += dbManager.getDelegationStore().getBrokerage(cycle, address);
       }
     }

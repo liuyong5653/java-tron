@@ -23,7 +23,7 @@ public class GetCurrentCycleService extends RateLimiterServlet {
       long startTimeStamp = Util
           .getJsonLongValue(jsonObject, "timeStamp", true);
 
-      long cycle = manager.getDelegationService().getCycleFromTimeStamp(startTimeStamp);
+      long cycle = manager.getDelegationService().getEndCycleFromTimeStamp(startTimeStamp);
       response.getWriter().println("{\"cycle\": " + cycle + "}");
     } catch (Exception e) {
       Util.processError(e, response);

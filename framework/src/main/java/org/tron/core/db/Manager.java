@@ -1350,7 +1350,6 @@ public class Manager {
     updateRecentBlock(block);
     updateDynamicProperties(block);
   }
-
   private void payReward(BlockCapsule block) {
     WitnessCapsule witnessCapsule =
         chainBaseManager.getWitnessStore().getUnchecked(block.getInstance().getBlockHeader()

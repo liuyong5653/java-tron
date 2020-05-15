@@ -585,7 +585,8 @@ public class WalletTest {
     long end = System.currentTimeMillis() + 60;
     {
       chainBaseManager.getDynamicPropertiesStore().saveChangeDelegation(0);
-      Assert.assertNotEquals(wallet.queryPayByTimeStamp(OWNER_ADDRESS.getBytes(), start, end).size(), 0);
+      Assert.assertEquals(wallet.queryPayByTimeStamp(OWNER_ADDRESS
+          .getBytes(), start, end).size(), 0);
     }
   }
 }

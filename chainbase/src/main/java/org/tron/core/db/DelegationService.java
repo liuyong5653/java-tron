@@ -232,7 +232,7 @@ public class DelegationService {
         .reversed().thenComparing(Comparator.comparingInt(ByteString::hashCode).reversed()));
   }
 
-  public long getCycleFromTimeStamp(long timeStamp) {
+  public long getEndCycleFromTimeStamp(long timeStamp) {
     long currentCycleTimeStamp = dynamicPropertiesStore.getCurrentCycleTimeStamp();
     if (timeStamp >= currentCycleTimeStamp) {
       return dynamicPropertiesStore.getCurrentCycleNumber();
@@ -243,6 +243,17 @@ public class DelegationService {
         .getInstance().getMaintenanceTimeInterval() != 0) {
       maintenanceNum = maintenanceNum + 1;
     }
+    return (dynamicPropertiesStore.getCurrentCycleNumber() - maintenanceNum) > 0 ?
+        (dynamicPropertiesStore.getCurrentCycleNumber() - maintenanceNum) : 0;
+  }
+  
+  public long getBeginCycleFromTimeStamp(long timeStamp) {
+    long currentCycleTimeStamp = dynamicPropertiesStore.getCurrentCycleTimeStamp();
+    if (timeStamp >= currentCycleTimeStamp) {
+      return dynamicPropertiesStore.getCurrentCycleNumber();
+    }
+    long maintenanceNum = (currentCycleTimeStamp - timeStamp) / CommonParameter
+        .getInstance().getMaintenanceTimeInterval() ;
     return (dynamicPropertiesStore.getCurrentCycleNumber() - maintenanceNum) > 0 ?
         (dynamicPropertiesStore.getCurrentCycleNumber() - maintenanceNum) : 0;
   }

@@ -166,7 +166,7 @@ public class DelegationStore extends TronStoreWithRevoking<BytesCapsule> {
   }
 
   private byte[] buildRemarkKey(long cycle, byte[] address) {
-    return (cycle + "-" + Hex.toHexString(address) + "remark").getBytes();
+    return (cycle + "-" + Hex.toHexString(address) + "-remark").getBytes();
   }
 
   private byte[] buildLastWithdrawCycleKey(byte[] address) {

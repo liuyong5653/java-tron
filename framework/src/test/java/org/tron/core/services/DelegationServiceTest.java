@@ -125,10 +125,10 @@ public class DelegationServiceTest {
     manager.getDynamicPropertiesStore().saveCurrentCycleTiimeStamp(t);
     manager.getDynamicPropertiesStore().saveCurrentCycleNumber(currentCircle);
     Assert.assertEquals(delegationService
-        .getCycleFromTimeStamp(t + 60), currentCircle);
-    Assert.assertEquals(delegationService.getCycleFromTimeStamp(t - CommonParameter
+        .getEndCycleFromTimeStamp(t + 60), currentCircle);
+    Assert.assertEquals(delegationService.getEndCycleFromTimeStamp(t - CommonParameter
         .getInstance().getMaintenanceTimeInterval()), currentCircle - 1);
-    Assert.assertEquals(delegationService.getCycleFromTimeStamp(t - CommonParameter
+    Assert.assertEquals(delegationService.getEndCycleFromTimeStamp(t - CommonParameter
         .getInstance().getMaintenanceTimeInterval()) - 1, currentCircle - 2);
 
   }
